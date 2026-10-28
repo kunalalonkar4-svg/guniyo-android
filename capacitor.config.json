@@ -1,0 +1,28 @@
+{
+  "appId": "com.guniyo.app",
+  "appName": "Guniyo",
+  "webDir": "www",
+  "server": {
+    "url": "https://guniyo.com/?source=app",
+    "androidScheme": "https",
+    "errorPath": "index.html",
+    "allowNavigation": ["guniyo.com", "www.guniyo.com"]
+  },
+  "android": {
+    "backgroundColor": "#1F2B2F",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#1F2B2F",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_INSIDE"
+    },
+    "StatusBar": { "backgroundColor": "#1F2B2F", "style": "DARK", "overlaysWebView": false },
+    "FirebaseAuthentication": { "skipNativeAuth": true, "providers": ["google.com"] }
+  }
+}

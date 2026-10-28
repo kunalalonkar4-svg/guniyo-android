@@ -1,0 +1,72 @@
+name: Build Guniyo APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Check setup
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then echo "::error::Secret KEYSTORE_B64 missing (Settings → Secrets and variables → Actions)"; exit 1; fi
+          if [ ! -s android/app/google-services.json ]; then echo "::error::android/app/google-services.json missing (download it from Firebase)"; exit 1; fi
+
+      - name: Install
+        run: npm ci
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build signed APK
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: guniyo
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 1.0.${{ github.run_number }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/guniyo.keystore"
+          export KEYSTORE_FILE="$RUNNER_TEMP/guniyo.keystore"
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Guniyo.apk"
+          rm -f "$RUNNER_TEMP/guniyo.keystore"
+
+      - name: Keep the APK with this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: Guniyo-apk
+          path: Guniyo.apk
+
+      - name: Publish release (download link stays the same)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Guniyo 1.0.${{ github.run_number }}
+          make_latest: true
+          files: Guniyo.apk
+          body: |
+            Guniyo Android app. Download **Guniyo.apk**, open it, tap **Install**.
+            Permanent link to the newest version: https://github.com/${{ github.repository }}/releases/latest/download/Guniyo.apk
