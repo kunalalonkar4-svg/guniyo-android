@@ -46,7 +46,12 @@ jobs:
           VERSION_CODE: ${{ github.run_number }}
           VERSION_NAME: 1.0.${{ github.run_number }}
         run: |
-          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/guniyo.keystore"
+          echo "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/guniyo.keystore"
+          export KEYSTORE_PASSWORD="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d ' \r\n')"
+          if ! keytool -list -keystore "$RUNNER_TEMP/guniyo.keystore" -storepass "$KEYSTORE_PASSWORD" -alias guniyo >/dev/null 2>&1; then
+            echo "::error::Secret KEYSTORE_PASSWORD galat hai (length ${#KEYSTORE_PASSWORD}, 24 hona chahiye). Settings → Secrets mein secret1-KEYSTORE_PASSWORD.txt ki value daalo."
+            rm -f "$RUNNER_TEMP/guniyo.keystore"; exit 1
+          fi
           export KEYSTORE_FILE="$RUNNER_TEMP/guniyo.keystore"
           cd android
           chmod +x gradlew
