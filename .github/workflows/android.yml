@@ -12,14 +12,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -50,7 +50,14 @@ jobs:
           export KEYSTORE_FILE="$RUNNER_TEMP/guniyo.keystore"
           cd android
           chmod +x gradlew
-          ./gradlew --no-daemon assembleRelease
+          set -o pipefail
+          if ! ./gradlew --no-daemon assembleRelease 2>&1 | tee "$RUNNER_TEMP/build.log"; then
+            # surface the important lines as annotations (readable without downloading logs)
+            grep -nE "What went wrong|error:|FAILURE|Could not|> Task .*FAILED|Exception|not found|unresolved|Cannot" "$RUNNER_TEMP/build.log" | head -40 > "$RUNNER_TEMP/err.txt" || true
+            i=0; while IFS= read -r line && [ $i -lt 9 ]; do echo "::error::${line:0:900}"; i=$((i+1)); done < "$RUNNER_TEMP/err.txt"
+            echo "::error::TAIL $(tail -25 "$RUNNER_TEMP/build.log" | tr '\n' '|' | cut -c1-3500)"
+            rm -f "$RUNNER_TEMP/guniyo.keystore"; exit 1
+          fi
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Guniyo.apk"
           rm -f "$RUNNER_TEMP/guniyo.keystore"
 
