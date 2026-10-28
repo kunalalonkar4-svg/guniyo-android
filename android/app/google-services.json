@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "29963502857",
+    "project_id": "ai-munshi-6d971",
+    "storage_bucket": "ai-munshi-6d971.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29963502857:android:61a20ac72fcff046eeffd8",
+        "android_client_info": {
+          "package_name": "com.guniyo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "29963502857-3kigecnerjags7mgul4ggl1g9nar6rj1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh5Z_FP0_t7utpkQgwURgEEJzZ528E8Ac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "29963502857-3kigecnerjags7mgul4ggl1g9nar6rj1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
